@@ -2,9 +2,11 @@ using Au_Some.Core.Identity;
 using Au_Some.Core.ServiceContract;
 using Au_Some.Core.Services;
 using Au_Some.Infrastructure.DatabaseContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -19,6 +21,21 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 builder.Services.AddTransient<IJwtService, JwtService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication(Options =>
+{
+    Options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;
+    Options.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters= new()
+    {
+        ValidateIssuer = true,
+        ValidIssuer=builder.Configuration["JWT:Issuer"],
+        ValidateLifetime=true,
+        ValidateIssuerSigningKey=true,
+        IssuerSigningKey=new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+    };
+});
 var app=builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
