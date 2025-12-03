@@ -102,5 +102,18 @@ namespace Au_Some.Controllers
               await _userManager.UpdateAsync(user);
             return Ok(authenticationResponse);
         }
+        [HttpGet("IsEmailAlreadyRegistered")]
+        public async Task<IActionResult> IsEmailAlreadyRegistered(string email)
+        {
+            ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return Ok(true);
+            }
+            else
+            {
+                return Ok(false);
+            }
+        }
     }
 }
